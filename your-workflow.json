@@ -1,0 +1,121 @@
+{
+  "name": "Auto Idea to Video Emailer",
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { topic: 'How to stay productive?' } }];"
+      },
+      "id": "1",
+      "name": "Set Topic",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a research assistant."
+          },
+          {
+            "role": "user",
+            "content": "Research and give me a unique video idea about {{ $json[\"topic\"] }}"
+          }
+        ]
+      },
+      "id": "2",
+      "name": "AI Research",
+      "type": "n8n-nodes-base.openaiChat",
+      "typeVersion": 1,
+      "position": [
+        400,
+        300
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a creative scriptwriter."
+          },
+          {
+            "role": "user",
+            "content": "Turn this idea into a video prompt: {{ $json[\"message\"] }}"
+          }
+        ]
+      },
+      "id": "3",
+      "name": "Generate Prompt",
+      "type": "n8n-nodes-base.openaiChat",
+      "typeVersion": 1,
+      "position": [
+        600,
+        300
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "you@example.com",
+        "toEmail": "you@example.com",
+        "subject": "\ud83c\udfa5 Your Auto-Generated Video Prompt",
+        "text": "Here is your video idea:\n\n{{ $json[\"message\"] }}"
+      },
+      "id": "4",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "1",
+          "name": "SMTP Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Set Topic": {
+      "main": [
+        [
+          "AI Research"
+        ]
+      ]
+    },
+    "AI Research": {
+      "main": [
+        [
+          "Generate Prompt"
+        ]
+      ]
+    },
+    "Generate Prompt": {
+      "main": [
+        [
+          "Send Email"
+        ]
+      ]
+    }
+  }
+}
